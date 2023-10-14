@@ -3,7 +3,11 @@ A simple yet functional email processor written in NodeJS!
 
 NOTE: You will need to use an "app password" for gmail. [\[More info\]](https://support.google.com/accounts/answer/185833?hl=en)
 
-# Documentation
+# Usage
+
+```javascript
+const GmailWatcher = require('cwhite-gmail-watcher');
+```
 
 The inline doc from the class:
 ```javascript
@@ -31,9 +35,10 @@ This is how I save my Credit Card transactions in MongoDB!
 (Anything marked as `HIDDEN` has been removed as I consider it sensitive)
 
 ```javascript
+const GmailWatcher = require('cwhite-gmail-watcher');
 const txnRegex = RegExp("[HIDDEN]");
 
-let g = new GmailProcessor(
+let g = new GmailWatcher(
     {
         username: '[HIDDEN]',
         password: '[HIDDEN]',
