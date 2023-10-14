@@ -1,2 +1,2 @@
 # GmailWatcher
-Generic GMail Processing in NodeJS
+Generic gmail Processing in NodeJS
