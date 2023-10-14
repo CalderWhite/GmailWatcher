@@ -11,6 +11,8 @@ const WaitGroup = require('waitgroup');
  *  {
  *       username: 'test@example.com',
  *       password: 'password123',
+ *       keepEmail: true,               // optional. If true, the emails will not be moved upon succesful processing
+ *       targetDomain: 'example.com',   // the domain you should be receiving these emails from. This is used to verify certificates
  *       outputFolder: 'myEmails',
  *       imapFilters: [
  *           ['FROM', '@mydomain.com'],
@@ -129,7 +131,7 @@ class GmailProcessor {
                             err = true;
                         }
 
-                        if (!err) {
+                        if (!err && !this.settings.keepEmail) {
                             await this.moveMsgOutOfInbox(uid);
                         }
                     }

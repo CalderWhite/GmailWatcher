@@ -20,6 +20,8 @@ The inline doc from the class:
  *  {
  *       username: 'test@example.com',
  *       password: 'password123',
+ *       keepEmail: true,               // optional. If true, the emails will not be moved upon succesful processing
+ *       targetDomain: 'example.com',   // the domain you should be receiving these emails from. This is used to verify certificates
  *       outputFolder: 'myEmails',
  *       imapFilters: [
  *           ['FROM', '@mydomain.com'],
@@ -31,54 +33,89 @@ The inline doc from the class:
 
 # Example
 
-This is how I save my Credit Card transactions in MongoDB!    
-(Anything marked as `HIDDEN` has been removed as I consider it sensitive)
+This is how I save my Credit Card transactions in AWS Lambda!    
+(Anything marked as `HIDDEN` has been removed as I consider it sensitive)    
+(I wish I could have used Mongo Atlas Functions, but they ran into issues with IMAP)
 
 ```javascript
-const GmailWatcher = require('cwhite-gmail-watcher');
-const txnRegex = RegExp("[HIDDEN]");
+import GmailWatcher from "cwhite-gmail-watcher";
+import { MongoClient, ServerApiVersion } from 'mongodb';
 
-const g = new GmailWatcher(
+const txnRegex = RegExp("[HIDDEN]);
+const uri = `[HIDDEN]`;
+
+function parseTxn({ messageId, text, date }) {
+  let res = txnRegex.exec(text);
+  if (!res) {
+    return { txn: null, parseErr: true };
+  }
+
+  const cardName = res[1];
+  const cardNumberSuffix = res[2];
+  const dollars = res[3] === '' ? 0 : Number(res[3]);
+  const cents = Number(res[4]);
+  const merchant = res[5];
+
+  const amount = dollars + (cents / 100);
+
+  return {
+    txn: {
+      _id: messageId,
+      cardName,
+      cardNumberSuffix,
+      timestamp: date,
+      amount,
+      merchant
+    },
+    parseErr: false
+  };
+}
+
+export const handler = event => {
+  const mongoClient = new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
+
+  const g = new GmailWatcher(
     {
-        username: '[HIDDEN]',
-        password: '[HIDDEN]',
-        outputFolder: '[HIDDEN]',
-        imapFilters: [
-            ['FROM', '[HIDDEN]'],
-            ['SUBJECT', '[HIDDEN]']
-        ],
+      username: '[HIDDEN]',
+      password: process.env.GOOGLE_APP_PASSWORD,
+      targetDomain: "[HIDDEN]",
+      keepEmail: true,
+      outputFolder: "[HIDDEN]",
+      imapFilters: [
+        ['FROM', '@[HIDDEN]'],
+        ['SUBJECT', '[HIDDEN]']
+      ],
     },
-    ({ text, date }) => {
-        let res = txnRegex.exec(text);
-        if (!res) {
-            return { txn: null, parseErr: true };
-        }
-
-        const cardName = res[1];
-        const cardNumberSuffix = res[2];
-        const dollars = res[3] === '' ? 0 : Number(res[3]);
-        const cents = Number(res[4]);
-        const merchant = res[5];
-
-        const amount = dollars + (cents / 100);
-
-        return {
-            txn: {
-                date,
-                cardName,
-                cardNumberSuffix,
-                amount,
-                merchant
-            },
-            parseErr: false
-        };
-    },
+    parseTxn,
     txn => {
-        // databaseName: '[HIDDEN]',
-        // collectionName: '[HIDDEN]',
-        console.log(txn);
+      return mongoClient
+        .db("[HIDDEN]")
+        .collection("[HIDDEN]")
+        .insertOne(txn)
     },
-);
+  );
 
-g.run();
+  mongoClient.connect().then(() => {
+    try {
+      g.run(async () => {
+        await mongoClient.close();
+      });
+    } catch (err) {
+      console.log("cwhite: General Error");
+      console.log(err.stack)
+      throw err;
+    }
+
+  }).catch(err => {
+    console.log("cwhite: Error connecting to MongoDB");
+    console.log(err.stack)
+    throw err;
+  });
+}
 ```
