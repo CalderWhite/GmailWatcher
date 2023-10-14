@@ -1,5 +1,6 @@
 const Imap = require('imap');
 const { simpleParser } = require('mailparser');
+const WaitGroup = require('waitgroup');
 
 /**
  * Generic interface to process emails from GMail using IMAP filters & body regex parsing.
@@ -32,14 +33,14 @@ class GmailProcessor {
         this.insertCallback = insertCallback;
     }
 
-    moveMsgOutOfInbox(uid) {
-        this.imap.move(uid, this.settings.outputFolder, err => {
+    async moveMsgOutOfInbox(uid) {
+        await this.imap.move(uid, this.settings.outputFolder, err => {
             if (err) {
                 throw err;
             }
             this.imap.end();
         })
-        this.imap.addFlags(uid, ['\\Seen'], err => {
+        await this.imap.addFlags(uid, ['\\Seen'], err => {
             if (err) {
                 throw err;
             }
@@ -66,7 +67,9 @@ class GmailProcessor {
             return;
         }
 
+        let wg = new WaitGroup();
         f.on('message', msg => {
+            wg.add();
             let stream;
             let uid;
             msg.on('body', stream_in => {
@@ -82,10 +85,20 @@ class GmailProcessor {
                 simpleParser(stream, async (err, parsed) => {
                     const { txn, parseErr } = this.parseFunc(parsed);
                     if (!parseErr) {
-                        this.insertCallback(txn);
-                        // this.mongoDBCollection.insertOne(txn);
-                        // moveMsgOutOfInbox(uid);
+                        let err = false;
+                        try {
+                            await this.insertCallback(txn);
+                        } catch (e) {
+                            console.log(e);
+                            err = true;
+                        }
+
+                        if (!err) {
+                            await this.moveMsgOutOfInbox(uid);
+                        }
                     }
+
+                    wg.done();
                 });
             });
         });
@@ -95,11 +108,11 @@ class GmailProcessor {
         });
 
         f.once('end', () => {
-            this.imap.end();
+            wg.wait(() => this.imap.end());
         });
     }
 
-    run() {
+    run(callback) {
         this.imap.once('ready', () => {
             this.imap.openBox('INBOX', false, () => {
                 this.imap.search(
@@ -114,6 +127,10 @@ class GmailProcessor {
         });
 
         this.imap.connect();
+
+        this.imap.once('end', () => {
+            callback();
+        })
     }
 }
 

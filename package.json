@@ -18,6 +18,7 @@
   "homepage": "https://github.com/CalderWhite/GmailWatcher/tree/main#readme",
   "dependencies": {
     "imap": "^0.8.19",
-    "mailparser": "^3.6.5"
+    "mailparser": "^3.6.5",
+    "waitgroup": "^1.1.0"
   }
 }
