@@ -3,6 +3,7 @@ const { simpleParser } = require('mailparser');
 
 /**
  * Generic interface to process emails from GMail using IMAP filters & body regex parsing.
+ * Once messages are processed, they are marked as read and moved to a designated folder
  * 
  * Calls `parseFunc` to turn emails into objects and `insertCallback` on successful parsing.
  * Example settings object:
@@ -16,7 +17,6 @@ const { simpleParser } = require('mailparser');
  *       ],
  *  }
  * 
- * Once messages are processed, they are marked as read and moved to a designated folder
  */
 class GmailProcessor {
     constructor(settings, parseFunc, insertCallback) {
