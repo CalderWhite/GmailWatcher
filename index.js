@@ -17,7 +17,7 @@ const { simpleParser } = require('mailparser');
  *       ],
  *  }
  */
-export default class GmailProcessor {
+class GmailProcessor {
     constructor(settings, parseFunc, insertCallback) {
         this.imap = new Imap({
             user: settings.username,
@@ -116,3 +116,5 @@ export default class GmailProcessor {
         this.imap.connect();
     }
 }
+
+module.exports = GmailProcessor;
