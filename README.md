@@ -41,7 +41,7 @@ This is how I save my Credit Card transactions in AWS Lambda!
 import GmailWatcher from "cwhite-gmail-watcher";
 import { MongoClient, ServerApiVersion } from 'mongodb';
 
-const txnRegex = RegExp("[HIDDEN]);
+const txnRegex = RegExp("[HIDDEN]");
 const uri = `[HIDDEN]`;
 
 function parseTxn({ messageId, text, date }) {
