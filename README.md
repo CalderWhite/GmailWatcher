@@ -38,7 +38,7 @@ This is how I save my Credit Card transactions in MongoDB!
 const GmailWatcher = require('cwhite-gmail-watcher');
 const txnRegex = RegExp("[HIDDEN]");
 
-let g = new GmailWatcher(
+const g = new GmailWatcher(
     {
         username: '[HIDDEN]',
         password: '[HIDDEN]',
