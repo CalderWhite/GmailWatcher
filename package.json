@@ -1,0 +1,19 @@
+{
+  "name": "cwhite-gmail-watcher",
+  "version": "0.1.0",
+  "description": "A simple yet functional email processor written in NodeJS!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CalderWhite/GmailWatcher.git#main"
+  },
+  "author": "Calder White",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CalderWhite/GmailWatcher/issues"
+  },
+  "homepage": "https://github.com/CalderWhite/GmailWatcher/tree/main#readme"
+}
