@@ -1,5 +1,7 @@
 # GmailWatcher
-Generic gmail Processing in NodeJS
+A simple yet functional email processor written in NodeJS!
+
+NOTE: You will need to use an "app password" for gmail. [\[More info\]](https://support.google.com/accounts/answer/185833?hl=en)
 
 # Documentation
 
