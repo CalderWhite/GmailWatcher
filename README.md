@@ -37,6 +37,48 @@ This is how I save my Credit Card transactions in AWS Lambda!
 (Anything marked as `HIDDEN` has been removed as I consider it sensitive)    
 (I wish I could have used Mongo Atlas Functions, but they ran into issues with IMAP)
 
+Truncated Version:
+```javascript
+import GmailWatcher from "cwhite-gmail-watcher";
+import { MongoClient, ServerApiVersion } from 'mongodb';
+
+const txnRegex = RegExp("[HIDDEN]");
+const uri = `[HIDDEN]`;
+
+function parseTxn({ messageId, text, date }) { /* ... */ }
+
+export const handler = event => {
+  const mongoClient = // ...
+
+  const g = new GmailWatcher(
+    {
+      username: '[HIDDEN]',
+      password: process.env.GOOGLE_APP_PASSWORD,
+      targetDomain: "[HIDDEN]",
+      keepEmail: true,
+      outputFolder: "[HIDDEN]",
+      imapFilters: [
+        ['FROM', '@[HIDDEN]'],
+        ['SUBJECT', '[HIDDEN]']
+      ],
+    },
+    parseTxn,
+    txn => {
+      return mongoClient
+        .db("[HIDDEN]")
+        .collection("[HIDDEN]")
+        .insertOne(txn)
+    },
+  );
+
+  mongoClient.connect().then(() => { /* ... */ }).catch(err => { /* ... */ });
+}
+```
+
+
+
+Full version:
+
 ```javascript
 import GmailWatcher from "cwhite-gmail-watcher";
 import { MongoClient, ServerApiVersion } from 'mongodb';
