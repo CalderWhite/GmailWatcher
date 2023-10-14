@@ -1,6 +1,6 @@
 {
   "name": "cwhite-gmail-watcher",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A simple yet functional email processor written in NodeJS!",
   "main": "index.js",
   "scripts": {

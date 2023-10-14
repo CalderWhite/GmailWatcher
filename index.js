@@ -47,6 +47,38 @@ class GmailProcessor {
         });
     }
 
+    verifyEmailSignature(headerLines) {
+        // verify the signature of the sender
+        let foundDKIM = false;
+        let foundDMARC = false;
+        let foundSPF = false;
+        for (let i = 0; i < headerLines.length; i++) {
+            const { key, line } = headerLines[i];
+            if (key === "arc-authentication-results" || key === "authentication-results") {
+                // only trust google's certs
+                if (!line.includes("Authentication-Results: mx.google.com;")) {
+                    continue;
+                }
+
+                if (line.includes(`dkim=pass header.i=@${this.settings.targetDomain}`)) {
+                    foundDKIM = true;
+                }
+                if (line.includes("dmarc=pass") && line.includes(`header.from=${this.settings.targetDomain}`)) {
+                    foundDMARC = true;
+                }
+                if (line.includes("spf=pass")) {
+                    foundSPF = true;
+                }
+            }
+
+            if (foundDKIM && foundDMARC && foundSPF) {
+                break;
+            }
+        }
+
+        return foundDKIM && foundDMARC;
+    }
+
     processIMAPSearchResults(searchErr, results) {
         if (searchErr) {
             throw searchErr;
@@ -83,6 +115,10 @@ class GmailProcessor {
                 // we only move the email out of the inbox if we parse
                 // it succesfully (both as an email and a transaction)
                 simpleParser(stream, async (err, parsed) => {
+                    if (!this.verifyEmailSignature(parsed.headerLines)) {
+                        console.log("WARNING: SPOOFED EMAIL: ");
+                        console.log(parsed);
+                    }
                     const { txn, parseErr } = this.parseFunc(parsed);
                     if (!parseErr) {
                         let err = false;
