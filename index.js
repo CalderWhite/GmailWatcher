@@ -16,9 +16,8 @@ const { simpleParser } = require('mailparser');
  *           ['SUBJECT', 'Daily Mail']
  *       ],
  *  }
- * 
  */
-class GmailProcessor {
+export default class GmailProcessor {
     constructor(settings, parseFunc, insertCallback) {
         this.imap = new Imap({
             user: settings.username,
